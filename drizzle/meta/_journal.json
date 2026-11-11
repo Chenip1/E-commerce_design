@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1793853162733,
+      "tag": "0000_gifted_sugar_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793882834789,
+      "tag": "0001_pink_psylocke",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794020059491,
+      "tag": "0002_imported_skills",
+      "breakpoints": true
+    }
+  ]
+}

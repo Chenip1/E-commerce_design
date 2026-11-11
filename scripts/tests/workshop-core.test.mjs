@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {makeProject,makeDesigns,designSvg,checkProject,zipFiles} from '../../lib/workshop.ts';
+const p=makeProject(true);p.product.confirmed=true;p.designs=makeDesigns(p);
+assert.equal(p.designs.length,6);assert.equal(checkProject(p).length,0);
+p.product.price='49';assert.ok(designSvg(p,4).includes('¥49'));assert.ok(designSvg(p,5).includes('¥49'));
+assert.ok(designSvg(p,0).includes('width="900" height="900"'));assert.ok(designSvg(p,1).includes('width="900" height="1200"'));
+p.product.price='invalid';assert.ok(checkProject(p).some(s=>s.includes('商品价格')));
+p.product.price='';assert.ok(!designSvg(p,4).includes('¥'));assert.ok(designSvg(p,4).includes('EXPLORE MORE'));
+p.product.name='<script>alert(1)</script>';assert.ok(!designSvg(p,0).includes('<script>'));assert.ok(designSvg(p,0).includes('&lt;script&gt;'));
+p.product.confirmed=false;assert.ok(checkProject(p).includes('请先确认商品资料'));
+p.product.confirmed=true;p.designs[0].title='标题'.repeat(30);assert.ok(checkProject(p).some(s=>s.includes('标题过长')));
+const blob=await zipFiles([{name:'测试.png',blob:new Blob(['test'])}]);assert.equal(new DataView(await blob.arrayBuffer()).getUint32(0,true),0x04034b50);
+console.log('PASS: 6 canvases, price sync, ratios, invalid price, no-price fallback, XML escaping, confirmation, overflow, ZIP');

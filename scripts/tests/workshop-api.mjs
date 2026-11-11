@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+const base=process.env.WORKSHOP_TEST_BASE_URL;
+if(!base||!/^http:\/\/(127\.0\.0\.1|localhost):/.test(base))throw new Error('仅允许通过WORKSHOP_TEST_BASE_URL指定可访问的本地测试地址');
+const headers={'Content-Type':'application/json','oai-authenticated-user-id':'qa-workshop','oai-authenticated-user-email':'qa@example.test'};
+const id=crypto.randomUUID(),p={id,name:'验收临时项目',revision:0,product:{name:'测试杯'}};
+let r=await fetch(base+'/projects',{method:'POST',headers,body:JSON.stringify({project:p,expected_revision:0})});assert.equal(r.status,201);let d=await r.json();assert.equal(d.revision,1);
+r=await fetch(base+'/projects',{method:'POST',headers,body:JSON.stringify({project:{...p,name:'更新项目'},expected_revision:1})});assert.equal(r.status,200);assert.equal((await r.json()).revision,2);
+r=await fetch(base+'/projects',{method:'POST',headers,body:JSON.stringify({project:p,expected_revision:1})});assert.equal(r.status,409);
+r=await fetch(base+'/projects',{method:'POST',headers:{...headers,'oai-authenticated-user-id':'qa-other'},body:JSON.stringify({project:p,expected_revision:2})});assert.equal(r.status,403);
+r=await fetch(base+'/projects',{headers:{...headers,'oai-authenticated-user-id':'qa-other'}});assert.ok(!(await r.json()).projects.some(x=>x.id===id));
+r=await fetch(base+'/projects');assert.equal(r.status,401);
+console.log('PASS: create, save, revision conflict, owner isolation, anonymous rejection');
